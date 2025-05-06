@@ -1,6 +1,4 @@
-import { Text } from "@/components/ThemedText";
-import { View } from "@/components/ThemedView";
-import { SafeAreaView, StyleSheet } from "react-native";
+import { SafeAreaView, StyleSheet, Text, View } from "react-native";
 
 export default function HomeScreen() {
   return (

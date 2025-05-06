@@ -1,9 +1,8 @@
-import { Text } from "@/components/ThemedText";
-import { View } from "@/components/ThemedView";
 import { spacing } from "@/constants/Spacing";
-import { fontSizes, fontWeights, lineHeights } from "@/constants/Typography";
+import { fontSizes } from "@/constants/Typography";
+import { useStyle } from "@/hooks/useStyle";
 import React from "react";
-import { Animated, StyleSheet, TextStyle, ViewStyle } from "react-native";
+import { Animated, Text, TextStyle, View, ViewStyle } from "react-native";
 
 type AnimatedHeadlineProps = {
   scrollY: Animated.Value;
@@ -21,10 +20,21 @@ export function AnimatedHeadline({
   containerStyle,
   textStyle,
 }: AnimatedHeadlineProps) {
+  const styles = useStyle((colors, { spacing, lineHeights, fontWeights }) => ({
+    container: {
+      paddingHorizontal: spacing.md,
+    },
+    headline: {
+      color: colors.text.title,
+      lineHeight: lineHeights.headline1,
+      fontWeight: fontWeights.bold,
+    },
+  }));
+
   const animatedFontSize = scrollY.interpolate({
     inputRange: [-100, 0, 100],
     outputRange: [
-      fontSizes.headline1 + 12,
+      fontSizes.headline1 + 10,
       fontSizes.headline1,
       fontSizes.headline1 - 4,
     ],
@@ -54,13 +64,3 @@ export function AnimatedHeadline({
     </AnimatedView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: spacing.md,
-  },
-  headline: {
-    lineHeight: lineHeights.headline1,
-    fontWeight: fontWeights.bold,
-  },
-});
