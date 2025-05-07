@@ -1,7 +1,9 @@
 import { AnimatedHeadline } from "@/components/AnimatedHeadline";
 import { SongItem } from "@/components/SongItem";
 import { Text } from "@/components/Text";
+import { WaveAnimation } from "@/components/WaveAnimation";
 import { Song } from "@/constants/Types";
+import { fontSizes } from "@/constants/Typography";
 import { useAudioPlayer } from "@/hooks/useAudioPlayer";
 import { useStyle } from "@/hooks/useStyle";
 import { useThemedColor } from "@/hooks/useThemeColor";
@@ -13,6 +15,7 @@ import React, { Fragment, useEffect, useRef, useState } from "react";
 import {
   Alert,
   Animated,
+  Dimensions,
   Keyboard,
   Platform,
   TextInput,
@@ -28,6 +31,9 @@ if (
 ) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
+
+const screen = Dimensions.get("window");
+const buffer = { bottom: 50 };
 
 export default function SongsScreen() {
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -59,42 +65,6 @@ export default function SongsScreen() {
       console.error("Error loading data", error);
     }
   };
-
-  const styles = useStyle((colors, { spacing }) => ({
-    container: {
-      flex: 1,
-      paddingHorizontal: spacing.lg,
-      gap: spacing.lg,
-    },
-    songsContainer: {
-      gap: spacing.md,
-    },
-    searchWrapper: {
-      flexDirection: "row",
-      alignItems: "center",
-    },
-    searchBox: {
-      flexDirection: "row",
-      alignItems: "center",
-      backgroundColor: colors.background.card,
-      borderRadius: 12,
-      paddingHorizontal: 12,
-      paddingVertical: 8,
-    },
-    searchInput: {
-      flex: 1,
-      fontSize: 16,
-      color: colors.text.default,
-      padding: 0,
-    },
-    cancelButton: {
-      marginLeft: spacing.sm,
-    },
-    cancelText: {
-      color: colors.tint,
-      fontSize: 16,
-    },
-  }));
 
   const handleUpload = async () => {
     try {
@@ -150,6 +120,47 @@ export default function SongsScreen() {
     playAudio(song.uri);
   };
 
+  const styles = useStyle((colors, { spacing }) => ({
+    container: {
+      flex: 1,
+      paddingHorizontal: spacing.lg,
+      marginBottom: buffer.bottom,
+      gap: spacing.lg,
+    },
+    songsContainer: {
+      gap: spacing.md,
+    },
+    searchWrapper: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    searchBox: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: colors.background.card,
+      borderRadius: 12,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+    },
+    searchInput: {
+      flex: 1,
+      fontSize: 16,
+      color: colors.text.default,
+      padding: 0,
+    },
+    cancelButton: {
+      marginLeft: spacing.sm,
+    },
+    cancelText: {
+      color: colors.tint,
+      fontSize: 16,
+    },
+    emptySongsText: {
+      fontSize: fontSizes.bodyLarge,
+      color: colors.text.subtitle,
+    },
+  }));
+
   useEffect(() => {
     loadSongs("songs");
   }, []);
@@ -167,7 +178,7 @@ export default function SongsScreen() {
       scrollEventThrottle={16}
       keyboardShouldPersistTaps="handled"
     >
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { minHeight: screen.height }]}>
         <AnimatedHeadline scrollY={scrollY} title="Songs" />
 
         <View style={styles.searchWrapper}>
@@ -213,20 +224,44 @@ export default function SongsScreen() {
         </View>
 
         <View style={styles.songsContainer}>
-          {filteredSongs.map((song: Song) => (
-            <Fragment key={song.id}>
-              <SongItem
-                song={song}
-                onPlay={() => handlePlay(song)}
-                isActive={activeSongId === song.id}
-              />
-            </Fragment>
-          ))}
+          {filteredSongs.length > 0 ? (
+            filteredSongs.map((song: Song) => (
+              <Fragment key={song.id}>
+                <SongItem
+                  song={song}
+                  onPlay={() => handlePlay(song)}
+                  isActive={activeSongId === song.id}
+                />
+              </Fragment>
+            ))
+          ) : (
+            <View
+              style={{
+                flexGrow: 1,
+                justifyContent: "center",
+                alignItems: "center",
+                gap: 20,
+                minHeight: screen.height * 0.6,
+              }}
+            >
+              <WaveAnimation color={tColors.icon} />
+              <Text style={styles.emptySongsText}>No songs found</Text>
+            </View>
+          )}
         </View>
 
         <TouchableOpacity style={{ marginTop: 20 }} onPress={handleUpload}>
+          <Text style={{ color: tColors.tint, fontSize: 18 }}>Upload Song</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={{ marginTop: 20 }}
+          onPress={() => {
+            setSongs([]);
+          }}
+        >
           <Text style={{ color: tColors.tint, fontSize: 18 }}>
-            Song hochladen
+            Delete Storage
           </Text>
         </TouchableOpacity>
       </SafeAreaView>

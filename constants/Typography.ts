@@ -1,6 +1,7 @@
 export const fontSizes = {
   headline1: 32,
   headline2: 24,
+  bodyLarge: 18,
   body: 16,
   caption: 12,
 } as const;

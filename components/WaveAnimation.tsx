@@ -1,3 +1,4 @@
+import { tint } from "@/constants/Colors";
 import { useStyle } from "@/hooks/useStyle";
 import { useEffect, useRef } from "react";
 import { Animated, View } from "react-native";
@@ -8,11 +9,15 @@ const DURATION = 600;
 export const WaveAnimation = ({
   height = 25,
   width = 40,
+  color,
 }: {
   height?: number;
   width?: number;
+  color?: string;
 }) => {
-  const styles = useStyle((colors) => ({
+  const c = color || tint;
+
+  const styles = useStyle(() => ({
     container: {
       height,
       width,
@@ -23,7 +28,7 @@ export const WaveAnimation = ({
     bar: {
       flex: 1,
       marginHorizontal: 2,
-      backgroundColor: colors.tint,
+      backgroundColor: c,
       borderRadius: 2,
     },
   }));

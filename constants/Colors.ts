@@ -8,7 +8,7 @@ const tint6 = '#1ABC9C';
 const tint7 = '#8E9AE3';
 const tint8 = "#5AC8FA"
 
-const tint = tint1
+export const tint = tint1
 
 
 export const colors = {

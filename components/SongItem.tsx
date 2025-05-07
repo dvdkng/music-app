@@ -55,6 +55,17 @@ export const SongItem = ({
     dotsButton: {
       padding: 5,
     },
+    activeSongContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: "rgba(0,0,0,0.5)",
+    },
+    activeSongBlur: {
+      width: "100%",
+      height: "100%",
+      position: "absolute",
+    },
   }));
 
   return (
@@ -79,22 +90,11 @@ export const SongItem = ({
             )}
 
             <FadeView visible={isActive}>
-              <View
-                style={{
-                  flex: 1,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  backgroundColor: "rgba(0,0,0,0.5)",
-                }}
-              >
+              <View style={styles.activeSongContainer}>
                 <BlurView
                   tint="systemChromeMaterial"
                   intensity={10}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    position: "absolute",
-                  }}
+                  style={styles.activeSongBlur}
                 />
                 <WaveAnimation />
               </View>
