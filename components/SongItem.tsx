@@ -2,10 +2,11 @@ import { Song } from "@/constants/Types";
 import { useStyle } from "@/hooks/useStyle";
 import { useThemedColor } from "@/hooks/useThemeColor";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { BlurView } from "expo-blur";
 import { Image, TouchableOpacity, View } from "react-native";
+import { FadeView } from "./FadeView";
 import { Text } from "./Text";
-
-import LoaderKit from "react-native-loader-kit";
+import { WaveAnimation } from "./WaveAnimation";
 
 export const SongItem = ({
   song,
@@ -47,6 +48,9 @@ export const SongItem = ({
       width: 60,
       backgroundColor: colors.background.card,
       borderRadius: 8,
+      justifyContent: "center",
+      alignItems: "center",
+      overflow: "hidden",
     },
     dotsButton: {
       padding: 5,
@@ -65,7 +69,7 @@ export const SongItem = ({
                     ? { uri: song.coverUri }
                     : { uri: song.coverUri || undefined }
                 }
-                style={styles.cover}
+                style={[styles.cover]}
                 onError={() =>
                   console.error("Fehler beim Laden des Covers:", song.coverUri)
                 }
@@ -73,7 +77,28 @@ export const SongItem = ({
             ) : (
               <Text>No IMG</Text>
             )}
-            <LoaderKit />
+
+            <FadeView visible={isActive}>
+              <View
+                style={{
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  backgroundColor: "rgba(0,0,0,0.5)",
+                }}
+              >
+                <BlurView
+                  tint="systemChromeMaterial"
+                  intensity={10}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    position: "absolute",
+                  }}
+                />
+                <WaveAnimation />
+              </View>
+            </FadeView>
           </View>
           <View style={styles.contentContainer}>
             <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
