@@ -1,13 +1,13 @@
 import { Tabs } from "expo-router";
 import React from "react";
-import { Platform } from "react-native";
+import { Platform, StyleSheet } from "react-native";
 
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
 import { HapticTab } from "@/components/HapticTab";
-import TabBarBackground from "@/components/ui/TabBarBackground";
 import { useThemedColor } from "@/hooks/useThemeColor";
+import { BlurView } from "expo-blur";
 
 export default function TabLayout() {
   const colors = useThemedColor();
@@ -18,10 +18,23 @@ export default function TabLayout() {
         tabBarActiveTintColor: colors.tint,
         headerShown: false,
         tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
+        tabBarBackground: () => (
+          <BlurView
+            intensity={95}
+            style={{
+              ...StyleSheet.absoluteFillObject,
+              overflow: "hidden",
+              borderTopLeftRadius: 20,
+              borderTopRightRadius: 20,
+            }}
+          />
+        ),
         tabBarStyle: Platform.select({
           ios: {
             position: "absolute",
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            paddingTop: 8
           },
           default: {},
         }),

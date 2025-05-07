@@ -1,3 +1,16 @@
+
+const tint1 = '#00C7BE'; 
+const tint2 = '#A390E4';
+const tint3 = '#00796B';
+const tint4 = '#D6A85C';
+const tint5 = '#FFADAD';
+const tint6 = '#1ABC9C';
+const tint7 = '#8E9AE3';
+const tint8 = "#5AC8FA"
+
+const tint = tint1
+
+
 export const colors = {
   light: {
     text: {
@@ -13,10 +26,10 @@ export const colors = {
       accent: '#F1F1F1',          
       darkAccent: '#D1D1D1',      
     },
-    tint: "#FF5722",
+    tint: tint,
     icon: '#687076',
     tabIconDefault: '#687076',
-    tabIconSelected: "#FF5722",
+    tabIconSelected: tint,
     border: '#E0E0E0',
   },
   dark: {
@@ -33,10 +46,11 @@ export const colors = {
       accent: '#121212',          
       darkAccent: '#1A1A1A',      
     },
-    tint: "#FF5722",
+    tint: tint,
     icon: '#9BA1A6',
     tabIconDefault: '#9BA1A6',
-    tabIconSelected: "#FF5722",
+    tabIconSelected: tint,
     border: '#333333',
   },
 };
+
