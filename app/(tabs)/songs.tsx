@@ -1,11 +1,16 @@
 import { AnimatedHeadline } from "@/components/AnimatedHeadline";
+import { SongItem } from "@/components/SongItem";
 import { Text } from "@/components/Text";
-import { dummySongs, Song } from "@/constants/dummySongs";
+import { Song } from "@/constants/Types";
+import { useAudioPlayer } from "@/hooks/useAudioPlayer";
 import { useStyle } from "@/hooks/useStyle";
 import { useThemedColor } from "@/hooks/useThemeColor";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import * as DocumentPicker from "expo-document-picker";
+import MusicInfo from "expo-music-info-2";
 import React, { Fragment, useRef, useState } from "react";
 import {
+  Alert,
   Animated,
   Keyboard,
   Platform,
@@ -27,9 +32,11 @@ export default function SongsScreen() {
   const scrollY = useRef(new Animated.Value(0)).current;
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+  const [songs, setSongs] = useState<Song[]>([]);
 
   const tColors = useThemedColor();
   const searchWidthAnim = useRef(new Animated.Value(1)).current;
+  const { playAudio } = useAudioPlayer();
 
   const styles = useStyle((colors, { spacing }) => ({
     container: {
@@ -67,7 +74,46 @@ export default function SongsScreen() {
     },
   }));
 
-  const filteredSongs = dummySongs.filter(
+  const handleUpload = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: "audio/mpeg",
+        copyToCacheDirectory: true,
+        multiple: false,
+      });
+
+      if (result.canceled) {
+        Alert.alert("Kein Song ausgewählt!");
+        return;
+      }
+
+      const file = result.assets?.[0];
+      if (file && file.uri) {
+        const metadata = await (MusicInfo as any).getMusicInfoAsync(file.uri, {
+          title: true,
+          artist: true,
+          album: true,
+          genre: true,
+          picture: true,
+        });
+
+        const newSong: Song = {
+          id: Date.now().toString(),
+          title: metadata.title || file.name.replace(".mp3", ""),
+          artist: metadata.artist || "Unknown",
+          duration: "--:--",
+          uri: file.uri,
+          coverUri: metadata.picture?.pictureData,
+        };
+
+        setSongs((prevSongs) => [...prevSongs, newSong]);
+      }
+    } catch (e) {
+      console.error("Fehler beim Hochladen:", e);
+      Alert.alert("Fehler beim Hochladen der Datei");
+    }
+  };
+  const filteredSongs = songs.filter(
     (song) =>
       song.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       song.artist.toLowerCase().includes(searchQuery.toLowerCase())
@@ -130,69 +176,17 @@ export default function SongsScreen() {
         <View style={styles.songsContainer}>
           {filteredSongs.map((song: Song) => (
             <Fragment key={song.id}>
-              <SongItem song={song} />
+              <SongItem song={song} onPlay={playAudio} />
             </Fragment>
           ))}
         </View>
+
+        <TouchableOpacity style={{ marginTop: 20 }} onPress={handleUpload}>
+          <Text style={{ color: tColors.tint, fontSize: 18 }}>
+            Song hochladen
+          </Text>
+        </TouchableOpacity>
       </SafeAreaView>
     </Animated.ScrollView>
   );
 }
-
-const SongItem = ({ song }: { song: Song }) => {
-  const { artist, title } = song;
-  const tColors = useThemedColor();
-
-  const styles = useStyle((colors, { spacing, fontWeights }) => ({
-    container: {
-      paddingVertical: spacing.xs,
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-    },
-    infoContainer: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: spacing.md,
-    },
-    title: {
-      fontWeight: fontWeights.bold,
-    },
-    artist: {
-      color: colors.text.subtitle,
-    },
-    cover: {
-      aspectRatio: 1,
-      width: 60,
-      backgroundColor: colors.background.card,
-      borderRadius: 8,
-    },
-    dotsButton: {
-      padding: 5,
-    },
-  }));
-
-  return (
-    <TouchableOpacity activeOpacity={0.75}>
-      <View style={styles.container}>
-        <View style={styles.infoContainer}>
-          <View style={styles.cover} />
-          <View>
-            <Text style={styles.title}>{title}</Text>
-            <Text style={styles.artist}>{artist}</Text>
-          </View>
-        </View>
-
-        <View>
-          <TouchableOpacity style={styles.dotsButton}>
-            <Ionicons
-              name="ellipsis-horizontal"
-              size={20}
-              color={tColors.text.subtitle}
-            />
-          </TouchableOpacity>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
-};
