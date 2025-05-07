@@ -8,7 +8,7 @@ import { useThemedColor } from "@/hooks/useThemeColor";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import * as DocumentPicker from "expo-document-picker";
 import MusicInfo from "expo-music-info-2";
-import React, { Fragment, useRef, useState } from "react";
+import React, { Fragment, useEffect, useRef, useState } from "react";
 import {
   Alert,
   Animated,
@@ -20,6 +20,8 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 if (
   Platform.OS === "android" &&
@@ -37,6 +39,26 @@ export default function SongsScreen() {
   const tColors = useThemedColor();
   const searchWidthAnim = useRef(new Animated.Value(1)).current;
   const { playAudio } = useAudioPlayer();
+
+  const storeSongs = async (key: string, value: string) => {
+    try {
+      await AsyncStorage.setItem(key, value);
+      console.log("Data stored successfully");
+    } catch (error) {
+      console.error("Error storing data", error);
+    }
+  };
+
+  const loadSongs = async (key: string) => {
+    try {
+      const songList = await AsyncStorage.getItem(key);
+      setSongs(songList ? JSON.parse(songList) : []);
+
+      console.log("Data loaded successfully");
+    } catch (error) {
+      console.error("Error loading data", error);
+    }
+  };
 
   const styles = useStyle((colors, { spacing }) => ({
     container: {
@@ -118,6 +140,14 @@ export default function SongsScreen() {
       song.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       song.artist.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  useEffect(() => {
+    loadSongs("songs");
+  }, []);
+
+  useEffect(() => {
+    storeSongs("songs", JSON.stringify(songs));
+  }, [songs]);
 
   return (
     <Animated.ScrollView
