@@ -6,6 +6,7 @@ import { useAudioPlayer } from "@/hooks/useAudioPlayer";
 import { useStyle } from "@/hooks/useStyle";
 import { useThemedColor } from "@/hooks/useThemeColor";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as DocumentPicker from "expo-document-picker";
 import MusicInfo from "expo-music-info-2";
 import React, { Fragment, useEffect, useRef, useState } from "react";
@@ -21,8 +22,6 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
 if (
   Platform.OS === "android" &&
   UIManager.setLayoutAnimationEnabledExperimental
@@ -35,10 +34,11 @@ export default function SongsScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [songs, setSongs] = useState<Song[]>([]);
+  const [activeSongId, setActiveSongId] = useState<string | null>(null);
 
   const tColors = useThemedColor();
   const searchWidthAnim = useRef(new Animated.Value(1)).current;
-  const { playAudio } = useAudioPlayer();
+  const { playAudio, stopAudio } = useAudioPlayer();
 
   const storeSongs = async (key: string, value: string) => {
     try {
@@ -141,6 +141,15 @@ export default function SongsScreen() {
       song.artist.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const handlePlay = (song: Song) => {
+    if (activeSongId === song.id) return;
+
+    stopAudio();
+
+    setActiveSongId(song.id);
+    playAudio(song.uri);
+  };
+
   useEffect(() => {
     loadSongs("songs");
   }, []);
@@ -206,7 +215,11 @@ export default function SongsScreen() {
         <View style={styles.songsContainer}>
           {filteredSongs.map((song: Song) => (
             <Fragment key={song.id}>
-              <SongItem song={song} onPlay={playAudio} />
+              <SongItem
+                song={song}
+                onPlay={() => handlePlay(song)}
+                isActive={activeSongId === song.id}
+              />
             </Fragment>
           ))}
         </View>
